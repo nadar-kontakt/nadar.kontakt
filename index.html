@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="bs" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Na Dar! - Tuzlanska Mreža za Darivanje</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/style.css" />
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Main Application Logic (lib/ then src/) -->
+  <script src="lib/supabase.js" defer></script>
+  <script src="src/app.js" defer></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              600: '#059669',
+              700: '#047857',
+              800: '#064e3b',
+              900: '#022c22',
+            },
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-full flex flex-col text-slate-800 antialiased bg-slate-50 font-sans">
+
+<!-- Header Section -->
+<header class="bg-[#07412b] text-white border-b border-emerald-900 sticky top-0 z-30 shadow-md">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+    
+    <!-- Logo with NaDar.png and style.css hover glow -->
+    <a href="#" class="flex items-center space-x-3 group">
+      <img src="NaDar.png" alt="Na Dar! Tuzla" class="h-16 w-auto object-contain logo-icon-glow group-hover:scale-105">
+      
+      <div class="border-l border-emerald-600/60 pl-3 py-0.5">
+        <span class="text-[10px] font-extrabold uppercase bg-amber-400 text-slate-950 px-2 py-0.5 rounded tracking-wider shadow-sm">
+          Tuzla
+        </span>
+        <p class="text-xs text-emerald-100 font-medium hidden sm:block mt-0.5">
+          Prepoloviti hljeb s komšilukom
+        </p>
+      </div>
+    </a>
+
+    <!-- Action Button -->
+    <button onclick="openModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-sm px-4 sm:px-5 py-2.5 rounded-xl shadow-md transition flex items-center space-x-2">
+      <svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+      </svg>
+      <span>Objavi</span>
+    </button>
+
+  </div>
+</header>
+
+  <!-- Hero Section -->
+  <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div class="bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900 text-white rounded-3xl p-6 sm:p-8 mb-8 shadow-md relative overflow-hidden">
+      <div class="absolute right-4 bottom-0 text-emerald-600/20 text-9xl font-black select-none pointer-events-none hidden sm:block">🥖</div>
+      
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center space-x-2 bg-emerald-600/40 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-emerald-100 mb-3 border border-emerald-400/20">
+  <span>📍 Grad Tuzla • Besplatno poklanjanje • Oglasi traju 14 dana</span>
+</div>
+        
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tight mb-3">
+          Ne bacaj – stavi <span class="text-amber-400 underline decoration-amber-400/50 decoration-wavy underline-offset-4">Na Dar</span>.
+        </h1>
+        
+        <p class="text-emerald-100 text-sm sm:text-base leading-relaxed mb-6 font-normal">
+          Stvari koje tebi više ne trebaju nekome u komšiluku mogu značiti mnogo. Bez registracije, naloga i komplikacija — stavi oglas i podijeli sa sugrađanima.
+        </p>
+
+        <!-- Neighborhood Filter Dropdown -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative flex-1">
+            <select id="filterNeighborhood" onchange="filterFeed()" class="w-full bg-white text-slate-800 font-semibold text-sm rounded-xl px-4 py-3 border-0 shadow-sm focus:ring-2 focus:ring-amber-400 appearance-none cursor-pointer">
+              <option value="ALL">📍 Cijeli Tuzlanski Kanton</option>
+              <option value="Tuzla - Centar/Slatina">Tuzla - Centar/Slatina</option>
+              <option value="Tuzla - Stupine/Irac">Tuzla - Stupine/Irac</option>
+              <option value="Lukavac">Lukavac</option>
+              <option value="Živinice">Živinice</option>
+              <option value="Gračanica">Gračanica</option>
+              <option value="Gradačac">Gradačac</option>
+              <option value="Srebrenik">Srebrenik</option>
+              <option value="Kalesija">Kalesija</option>
+              <option value="Banovići">Banovići</option>
+              <option value="Kladanj">Kladanj</option>
+              <option value="Sapna">Sapna</option>
+            </select>
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">▼</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Feed Section -->
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+        <span>Stvari na dar</span>
+        <span id="itemCount" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold">0</span>
+      </h2>
+    </div>
+
+    <!-- Cards Grid (Loaded dynamically from Supabase) -->
+    <div id="itemsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="col-span-full text-center py-12 text-slate-400 text-sm">
+        Učitavanje oglasa...
+      </div>
+    </div>
+  </main>
+
+  <!-- Anonymous Post Modal -->
+  <div id="postModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative animate-slide-up max-h-[90vh] overflow-y-auto">
+      
+      <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      
+      <div class="mb-6">
+        <h3 class="text-2xl font-black text-slate-900">Objavi stvar na dar</h3>
+        <p class="text-slate-500 text-sm mt-1">Bez kreiranja računa. Samo unesite osnovne detalje za komšije.</p>
+      </div>
+
+      <form id="itemForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Naziv predmeta *</label>
+          <input type="text" id="titleInput" required placeholder="npr. Drvena stolica, Dječije biciklo" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Grad / Opština *</label>
+            <select id="neighborhoodInput" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none">
+              <option value="">Izaberi grad ili opštinu</option>
+              <option value="Tuzla - Centar/Slatina">Tuzla - Centar/Slatina</option>
+              <option value="Tuzla - Stupine/Irac">Tuzla - Stupine/Irac</option>
+              <option value="Lukavac">Lukavac</option>
+              <option value="Živinice">Živinice</option>
+              <option value="Gračanica">Gračanica</option>
+              <option value="Gračanica">Gračanica</option>
+              <option value="Gradačac">Gradačac</option>
+              <option value="Srebrenik">Srebrenik</option>
+              <option value="Kalesija">Kalesija</option>
+              <option value="Banovići">Banovići</option>
+              <option value="Kladanj">Kladanj</option>
+              <option value="Sapna">Sapna</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Telefon / Viber *</label>
+            <input type="text" id="phoneInput" required placeholder="061 000 000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Email adresa (po zelji)</label>
+          <input type="email" id="emailInput" placeholder="vas.email@domain.com" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Kratak opis *</label>
+          <textarea id="descInput" required rows="3" placeholder="Opišite stanje predmeta i kako ga komšija može preuzeti..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">Slika predmeta (opcionalno)</label>
+          <input type="file" id="imageInput" accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-600 focus:ring-2 focus:ring-emerald-600 focus:bg-white outline-none cursor-pointer">
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-md transition text-sm cursor-pointer">
+          Objavi na dar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- "Broken Bread" Confirmation Toast Animation Overlay -->
+  <div id="breadOverlay" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl animate-slide-up">
+      <div class="w-20 h-20 mx-auto mb-4 animate-pulse-glow">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full text-amber-500">
+          <path d="M12 36C12 24 20 18 30 18C30 26 28 42 12 42V36Z" fill="#F59E0B" />
+          <path d="M52 36C52 24 44 18 34 18C34 26 36 42 52 42V36Z" fill="#F59E0B" />
+          <path d="M32 26L34.5 31L40 31.5L35.8 35.2L37.2 40.5L32 37.5L26.8 40.5L28.2 35.2L24 31.5L32 26Z" fill="#FFFFFF" />
+          <path d="M12 42C20 46 44 46 52 42" stroke="#D97706" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h4 class="text-xl font-extrabold text-slate-900 mb-2">Hvala ti! 🥖</h4>
+      <p class="text-slate-600 text-sm leading-relaxed mb-4">
+        Upravo si prepolovio hljeb s komšilukom. Hvala ti što vraćaš život i darivanje u Tuzlu.
+      </p>
+      <div class="h-1 bg-emerald-100 rounded-full overflow-hidden">
+        <div class="h-full bg-emerald-600 animate-[pulse_1.5s_infinite]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-[#07412b] text-emerald-100 border-t border-emerald-900 mt-16 py-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-emerald-800/80">
+        
+        <!-- Column 1: Identity & Motto -->
+        <div class="space-y-3">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🥖</span>
+            <span class="font-black text-lg text-white tracking-tight">Na Dar!</span>
+            <span class="text-[10px] font-extrabold uppercase bg-amber-400 text-slate-950 px-2 py-0.5 rounded tracking-wider">
+              Tuzla
+            </span>
+          </div>
+          <p class="text-xs text-emerald-200/90 leading-relaxed font-normal">
+            Prepoloviti hljeb s komšilukom. Besplatna, nekomercijalna i P2P lokalna platforma za darivanje stvari u Tuzlanskom Kantonu.
+          </p>
+          <div class="pt-2 flex flex-col space-y-2.5 text-xs text-emerald-200">
+            <div class="flex items-center space-x-2">
+              <span>✉️</span>
+              <a href="mailto:nadar.kontakt@gmail.com" class="hover:text-amber-400 transition underline underline-offset-2 font-medium">nadar.kontakt@gmail.com</a>
+            </div>
+            
+            <div class="flex items-center space-x-2 pt-1">
+              <!-- Facebook Link -->
+              <a href="https://www.facebook.com/profile.php?id=61595778075010" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 bg-emerald-900/60 hover:bg-emerald-800 text-amber-300 font-medium px-2.5 py-1 rounded-lg transition border border-emerald-700/50">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <span>Facebook</span>
+              </a>
+
+              <!-- Instagram Link -->
+              <a href="https://www.instagram.com/nadar.kontakt/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 bg-emerald-900/60 hover:bg-emerald-800 text-amber-300 font-medium px-2.5 py-1 rounded-lg transition border border-emerald-700/50">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <span>Instagram</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Quick Guidelines -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Pravila Komšiluka</h4>
+          <ul class="text-xs text-emerald-200/80 space-y-1.5 font-normal">
+            <li class="flex items-center space-x-2">
+              <span>🎁</span>
+              <span>Sve stvari se poklanjaju 100% besplatno</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <span>🤝</span>
+              <span>Bez preprodaje i komercijalnih oglasa</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <span>📞</span>
+              <span>Direktan kontakt preko telefona ili Vibera</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Regional Scope -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400">Obuhvat Mreže</h4>
+          <p class="text-xs text-emerald-200/80 leading-relaxed">
+            Dostupno za sve opštine i gradove u Tuzlanskom Kantonu: Tuzla, Lukavac, Živinice, Gračanica, Gradačac, Srebrenik, Kalesija, Banovići i okolina.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-emerald-300/70 gap-3">
+        <p>© Na Dar! — Volonterski i građanski projekat za Tuzlanski Kanton.</p>
+        <div class="flex items-center space-x-4">
+          <button onclick="openTermsModal()" class="hover:text-amber-400 transition underline underline-offset-2">Uslovi korištenja & Privatnost</button>
+          <span class="text-[11px] text-emerald-300/50 hidden sm:inline">• Bez reklama • Bez skupljanja podataka</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Terms & Legal Rights Modal -->
+  <div id="termsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative animate-slide-up max-h-[85vh] overflow-y-auto">
+      
+      <button onclick="closeTermsModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-2xl font-bold">✕</button>
+      
+      <div class="mb-6 pb-4 border-b border-slate-100">
+        <div class="inline-flex items-center space-x-2 bg-emerald-50 px-3 py-1 rounded-full text-xs font-bold text-emerald-800 mb-2">
+          <span>📜 Pravne napomene & Sigurnost</span>
+        </div>
+        <h3 class="text-2xl font-black text-slate-900">Uslovi korištenja i Privatnost</h3>
+      </div>
+
+      <div class="space-y-4 text-xs sm:text-sm text-slate-600 leading-relaxed">
+        <div>
+          <h4 class="font-bold text-slate-900 text-base mb-1">1. Besplatna priroda platforme</h4>
+          <p>
+            "Na Dar!" je neprofitni, volonterski komšijski servis namijenjen isključivo besplatnom darivanju predmeta građana Tuzlanskog Kantona. Zabranjeno je objavljivanje komercijalnih oglasa, prodaja stvari, traženje novca ili bilo kakva preprodaja.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 text-base mb-1">2. Odricanje odgovornosti</h4>
+          <p>
+            Platforma služi isključivo kao posrednik u prikazivanju oglasa. Platforma i njeni tvorci ne snose odgovornost za ispravnost, sigurnost ili kvalitet poklonjenih predmeta, niti za dogovore i fizičke susrete između korisnika. Preporučujemo da se primopredaja stvari vrši na javnim i sigurnim lokacijama u vašem komšiluku.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 text-base mb-1">3. Privatnost i javni podaci</h4>
+          <p>
+            Platforma ne zahtijeva registraciju korisničkog računa niti prikuplja lične podatke u svrhu profilisanja ili marketinga. Broj telefona i grad/naselje koje dobrovoljno unesete u obrazac za objavu oglasa javno su vidljivi isključivo u svrhu direktnog komšijskog kontakta (poziv ili Viber).
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 text-base mb-1">4. Pravila sadržaja</h4>
+          <p>
+            Zabranjeno je objavljivanje opasnih materija, oružja, lijekova, alkohola, nezakonitih artikala ili neprimjerenog/uvredljivog teksta. Svi oglasi koji krše ova pravila biće uklonjeni bez prethodne najave.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-4 border-t border-slate-100 text-right">
+        <button onclick="closeTermsModal()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition cursor-pointer">
+          Razumijem i prihvatam
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      toggleModal(true);
+    }
+    function closeModal() {
+      toggleModal(false);
+    }
+    // Terms Modal Controllers
+    function openTermsModal() {
+      const modal = document.getElementById('termsModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+    function closeTermsModal() {
+      const modal = document.getElementById('termsModal');
+      if (modal) modal.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
